@@ -25,13 +25,13 @@ class Program
         double radius = double.Parse(Console.ReadLine(), CultureInfo.InvariantCulture);
 
         List<Point, string> placesWithinRadius = kdTree.RangeQuery(userLat, userLon, radius);
-        
+
         Console.WriteLine("LIST OF PLACES");
         foreach ((Point point, string placeType) in placesWithinRadius)
         {
             Console.WriteLine($" TYPE {placeType} | LOCATION ({point.Latitude}, {point.Longitude}));
         }
-    
+
 
         static KdTree ConstructKdTree(string filePath)
         {
@@ -48,7 +48,52 @@ class Program
 
             return kdTree;
         }
-}
+    }
+
+    public class Point
+    {
+        public double Latitude { get;}
+        public double Longitude { get;}
+
+        public Point(double latitude, double longitude)
+        {
+            Latitude = latitude;
+            Longitude = longitude;
+        }
+    }
+
+    public class KdTree
+    {
+        private class Node
+        {
+            public double Latitude { get;}
+            public double Longitude { get;}
+            public string PlaceType { get;}
+            public Node Left { get; set;}
+            public Node Right { get; set;}
+            
+        }
+
+        public Node(double latitude, double longitude, string placeType)
+        {
+            Latitude = latitude;
+            Longitude = longitude;
+            PlaceType = placeType;
+            Left = null;
+            Right = nulll;
+            
+        }
+    }
+
+    private Node root;
+
+    public KdTree()
+    {
+        root = null;
+    }
+    
+    
+
     
 
         
