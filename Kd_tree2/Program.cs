@@ -29,9 +29,26 @@ class Program
         Console.WriteLine("LIST OF PLACES");
         foreach ((Point point, string placeType) in placesWithinRadius)
         {
-            eConsole.WriteLine($" TYPE {placeType} | LOCATION ({point.Latitude}, {point.Longitude}));
+            Console.WriteLine($" TYPE {placeType} | LOCATION ({point.Latitude}, {point.Longitude}));
         }
-    }
+    
+
+        static KdTree ConstructKdTree(string filePath)
+        {
+            kdTree kdTree = new KdTree();
+            string[] lines = File.ReadAllLines(filePath);
+            foreach (string line in lines)
+            {
+                var parts = line.Split(';');
+                double latitude = double.Parse(parts[0], CultureInfo.InvariantCulture);
+                double longitude = double.Parse(parts[1], CultureInfo.InvariantCulture);
+                string placeType = parts[2];
+                kdTree.Insert(latitude, longitude, placeType);
+            }
+
+            return kdTree;
+        }
 }
+    
 
         
