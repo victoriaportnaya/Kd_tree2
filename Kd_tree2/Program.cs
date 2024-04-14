@@ -91,7 +91,38 @@ class Program
     {
         root = null;
     }
-    
+
+    public void Insert(double latitude, double longitude, string placeType)
+    {
+        root = Insert(root, latitude, longitude, placeType, 0);
+    }
+
+    private Node Insert(Node node, double latitude, double longitude, string placeType, int depth)
+    {
+        if (node == null)
+            return new Node(latitude, longitude, placeType);
+        int cd = depth % 2;
+
+        if (cd == 0)
+        {
+            if (latitude < node.Latitude)
+                node.Left = Insert(node.Left, latitude, longitude, placeType, depth + 1);
+            else
+                node.Right = Insert(node.Right, latitude, longitude, placeType, depth + 1);
+        }
+
+        else
+        {
+            if (longitude < node.Longitude)
+                node.Left = Insert(node.Left, latitude, longitude, placeType, depth + 1);
+            else
+            {
+                node.Right = Insert(node.Right, latitude, longitude, placeType, depth + 1);
+            }
+        }
+
+        return node;
+    }
     
 
     
