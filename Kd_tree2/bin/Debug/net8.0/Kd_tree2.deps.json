@@ -1,0 +1,23 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v8.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v8.0": {
+      "Kd_tree2/1.0.0": {
+        "runtime": {
+          "Kd_tree2.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "Kd_tree2/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}

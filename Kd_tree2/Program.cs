@@ -1,10 +1,7 @@
-﻿// download data
-// console program to get user lat long rad 
-// distance to the point (heap) and show if the distance is less than rad
-using System;
-using System.IO;
+﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
-using Microsoft.VisualBasic.CompilerServices;
+using System.IO;
 
 class Program
 {
@@ -12,7 +9,7 @@ class Program
     {
         string csvCoordinates = "C:\\Users\\victo\\RiderProjects\\R-tree\\R-tree\\positions.csv";
 
-        string[] lines = File.ReadAllLines(csvCoordinates);
+        KdTree kdTree = ConstructKdTree(csvCoordinates);
 
         // get user`s coordinates
         Console.WriteLine("Your latitude>>");
@@ -21,58 +18,56 @@ class Program
         Console.WriteLine("Enter your longitude>>");
         double userLon = double.Parse(Console.ReadLine(), CultureInfo.InvariantCulture);
 
-        Console.WriteLine("Enter the radius (in km)>>");
+        Console.WriteLine("Enter the radius (in meters)>>");
         double radius = double.Parse(Console.ReadLine(), CultureInfo.InvariantCulture);
 
-        List<Point, string> placesWithinRadius = kdTree.RangeQuery(userLat, userLon, radius);
+        List<(Point, string)> placesWithinRadius = kdTree.RangeQuery(userLat, userLon, radius);
 
         Console.WriteLine("LIST OF PLACES");
         foreach ((Point point, string placeType) in placesWithinRadius)
         {
-            Console.WriteLine($" TYPE {placeType} | LOCATION ({point.Latitude}, {point.Longitude}));
-        }
-
-
-        static KdTree ConstructKdTree(string filePath)
-        {
-            kdTree kdTree = new KdTree();
-            string[] lines = File.ReadAllLines(filePath);
-            foreach (string line in lines)
-            {
-                var parts = line.Split(';');
-                double latitude = double.Parse(parts[0], CultureInfo.InvariantCulture);
-                double longitude = double.Parse(parts[1], CultureInfo.InvariantCulture);
-                string placeType = parts[2];
-                kdTree.Insert(latitude, longitude, placeType);
-            }
-
-            return kdTree;
+            Console.WriteLine($"TYPE {placeType} | LOCATION ({point.Latitude}, {point.Longitude})");
         }
     }
 
-    public class Point
+    static KdTree ConstructKdTree(string filePath)
     {
-        public double Latitude { get;}
-        public double Longitude { get;}
-
-        public Point(double latitude, double longitude)
+        KdTree kdTree = new KdTree();
+        string[] lines = File.ReadAllLines(filePath);
+        foreach (string line in lines)
         {
-            Latitude = latitude;
-            Longitude = longitude;
+            var parts = line.Split(';');
+            if (parts.Length != 3) continue; 
+            if (!double.TryParse(parts[0], out double latitude)) continue;
+            if (!double.TryParse(parts[1], out double longitude)) continue; 
+            string placeType = parts[2];
+            kdTree.Insert(latitude, longitude, placeType);
         }
+        return kdTree;
     }
+}
 
-    public class KdTree
+public class Point
+{
+    public double Latitude { get; }
+    public double Longitude { get; }
+
+    public Point(double latitude, double longitude)
     {
-        private class Node
-        {
-            public double Latitude { get;}
-            public double Longitude { get;}
-            public string PlaceType { get;}
-            public Node Left { get; set;}
-            public Node Right { get; set;}
-            
-        }
+        Latitude = latitude;
+        Longitude = longitude;
+    }
+}
+
+public class KdTree
+{
+    private class Node
+    {
+        public double Latitude { get; }
+        public double Longitude { get; }
+        public string PlaceType { get; }
+        public Node Left { get; set; }
+        public Node Right { get; set; }
 
         public Node(double latitude, double longitude, string placeType)
         {
@@ -80,8 +75,7 @@ class Program
             Longitude = longitude;
             PlaceType = placeType;
             Left = null;
-            Right = nulll;
-            
+            Right = null;
         }
     }
 
@@ -110,21 +104,52 @@ class Program
             else
                 node.Right = Insert(node.Right, latitude, longitude, placeType, depth + 1);
         }
-
         else
         {
             if (longitude < node.Longitude)
                 node.Left = Insert(node.Left, latitude, longitude, placeType, depth + 1);
             else
-            {
                 node.Right = Insert(node.Right, latitude, longitude, placeType, depth + 1);
-            }
         }
 
         return node;
     }
-    
 
-    
+    public List<(Point, string)> RangeQuery(double latitude, double longitude, double radius)
+    {
+        List<(Point, string)> placesWithinRadius = new List<(Point, string)>();
+        RangeQuery(root, latitude, longitude, radius, 0, placesWithinRadius);
+        return placesWithinRadius;
+    }
 
-        
+    private void RangeQuery(Node node, double latitude, double longitude, double radius, int depth,
+        List<(Point, string)> result)
+    {
+        if (node == null)
+            return;
+        double dx = node.Longitude - longitude;
+        double dy = node.Latitude - latitude;
+
+        if (Math.Sqrt(dx * dx + dy * dy) <= radius)
+        {
+            result.Add((new Point(node.Latitude, node.Longitude), node.PlaceType));
+        }
+
+        int cd = depth % 2;
+
+        if (cd == 0)
+        {
+            if (latitude - radius <= node.Latitude)
+                RangeQuery(node.Left, latitude, longitude, radius, depth + 1, result);
+            if (latitude + radius > node.Latitude)
+                RangeQuery(node.Right, latitude, longitude, radius, depth + 1, result);
+        }
+        else
+        {
+            if (longitude - radius <= node.Longitude)
+                RangeQuery(node.Left, latitude, longitude, radius, depth + 1, result);
+            if (longitude + radius > node.Longitude)
+                RangeQuery(node.Right, latitude, longitude, radius, depth + 1, result);
+        }
+    }
+}
