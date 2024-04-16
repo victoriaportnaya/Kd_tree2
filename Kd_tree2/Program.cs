@@ -12,21 +12,28 @@ class Program
         KdTree kdTree = ConstructKdTree(csvCoordinates);
 
         // get user`s coordinates
-        Console.WriteLine("Your latitude>>");
+        Console.WriteLine("Enter your latitude:");
         double userLat = double.Parse(Console.ReadLine(), CultureInfo.InvariantCulture);
 
-        Console.WriteLine("Enter your longitude>>");
+        Console.WriteLine("Enter your longitude:");
         double userLon = double.Parse(Console.ReadLine(), CultureInfo.InvariantCulture);
 
-        Console.WriteLine("Enter the radius (in meters)>>");
+        Console.WriteLine("Enter the radius (in meters):");
         double radius = double.Parse(Console.ReadLine(), CultureInfo.InvariantCulture);
 
         List<(Point, string)> placesWithinRadius = kdTree.RangeQuery(userLat, userLon, radius);
 
-        Console.WriteLine("LIST OF PLACES");
-        foreach ((Point point, string placeType) in placesWithinRadius)
+        if (placesWithinRadius.Count == 0)
         {
-            Console.WriteLine($"TYPE {placeType} | LOCATION ({point.Latitude}, {point.Longitude})");
+            Console.WriteLine("No places found within radius.");
+        }
+        else
+        {
+            Console.WriteLine("List of places within radius:");
+            foreach ((Point point, string placeType) in placesWithinRadius)
+            {
+                Console.WriteLine($"TYPE {placeType} | LOCATION ({point.Latitude}, {point.Longitude})");
+            }
         }
     }
 
@@ -37,9 +44,9 @@ class Program
         foreach (string line in lines)
         {
             var parts = line.Split(';');
-            if (parts.Length != 3) continue; 
+            if (parts.Length != 3) continue;
             if (!double.TryParse(parts[0], out double latitude)) continue;
-            if (!double.TryParse(parts[1], out double longitude)) continue; 
+            if (!double.TryParse(parts[1], out double longitude)) continue;
             string placeType = parts[2];
             kdTree.Insert(latitude, longitude, placeType);
         }
@@ -127,10 +134,20 @@ public class KdTree
     {
         if (node == null)
             return;
-        double dx = node.Longitude - longitude;
-        double dy = node.Latitude - latitude;
 
-        if (Math.Sqrt(dx * dx + dy * dy) <= radius)
+        double lat1 = latitude * Math.PI / 180.0;
+        double lon1 = longitude * Math.PI / 180.0;
+        double lat2 = node.Latitude * Math.PI / 180.0;
+        double lon2 = node.Longitude * Math.PI / 180.0;
+
+        double dlat = lat2 - lat1;
+        double dlon = lon2 - lon1;
+
+        double a = Math.Pow(Math.Sin(dlat / 2), 2) + Math.Cos(lat1) * Math.Cos(lat2) * Math.Pow(Math.Sin(dlon / 2), 2);
+        double c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
+
+        double distance = 6371000 * c;
+        if (distance <= radius)
         {
             result.Add((new Point(node.Latitude, node.Longitude), node.PlaceType));
         }
@@ -152,4 +169,6 @@ public class KdTree
                 RangeQuery(node.Right, latitude, longitude, radius, depth + 1, result);
         }
     }
+
+
 }
