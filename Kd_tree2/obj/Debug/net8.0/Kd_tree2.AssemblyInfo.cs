@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Kd_tree2")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+44b0b3453b1f5bfd4102d509d86645bc3610d4da")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+712d75c150a68b32669205735b4e16d7796cd061")]
 [assembly: System.Reflection.AssemblyProductAttribute("Kd_tree2")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Kd_tree2")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

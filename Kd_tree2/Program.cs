@@ -20,7 +20,7 @@ class Program
         double userLon = double.Parse(Console.ReadLine(),  CultureInfo.InvariantCulture);
 
         Console.WriteLine("Enter the radius (in meters):");
-        double radius = double.Parse(Console.ReadLine(), CultureInfo.InvariantCulture) / 111000; 
+        double radius = double.Parse(Console.ReadLine(), CultureInfo.InvariantCulture); 
 
 
         List<(Point, string)> placesWithinRadius = kdTree.RangeQuery(userLat, userLon, radius);
@@ -46,7 +46,6 @@ class Program
         foreach (string line in lines)
         {
             var parts = line.Split(';');
-            if (parts.Length != 3) continue;
             if (!double.TryParse(parts[0], out double latitude)) continue;
             if (!double.TryParse(parts[1], out double longitude)) continue;
             string placeType = parts[2];
@@ -113,10 +112,10 @@ public class KdTree
         double lat2 = node.Latitude * Math.PI / 180.0;
         double lon2 = node.Longitude * Math.PI / 180.0;
 
-        double dlat = lat2 - lat1;
-        double dlon = lon2 - lon1;
+        double dLat = lat2 - lat1;
+        double dLon = lon2 - lon1;
 
-        double a = Math.Pow(Math.Sin(dlat / 2), 2) + Math.Cos(lat1) * Math.Cos(lat2) * Math.Pow(Math.Sin(dlon / 2), 2);
+        double a = Math.Pow(Math.Sin(dLat / 2), 2) + Math.Cos(lat1) * Math.Cos(lat2) * Math.Pow(Math.Sin(dLon / 2), 2);
         double c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
 
         double distance = 6371000 * c;
@@ -142,8 +141,8 @@ public class KdTree
             if (Math.Abs(longitude - node.Longitude) <= radius && Math.Abs(latitude - node.Latitude) <= radius)
                 RangeQuery(node.Right, latitude, longitude, radius, depth + 1, result);
         }
-
     }
+
 
 
     private Node ConstructKdTree(List<(double, double, string)> points, int depth)
